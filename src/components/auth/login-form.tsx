@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { authenticate } from "@/lib/actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,29 +9,21 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
+function LoginButton() {
+    const { pending } = useFormStatus();
+    return (
+        <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" aria-disabled={pending}>
+            {pending ? "Accediendo..." : "Acceder"}
+        </Button>
+    );
+}
+
+
 export function LoginForm() {
-  const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [isPending, setIsPending] = useState(false);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsPending(true);
-    setErrorMessage(undefined);
-
-    const formData = new FormData(event.currentTarget);
-    const result = await authenticate(formData);
-
-    if (result.success) {
-      router.push("/dashboard");
-    } else {
-      setErrorMessage(result.message);
-      setIsPending(false);
-    }
-  };
+  const [errorMessage, formAction] = useActionState(authenticate, undefined);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="username">Usuario</Label>
         <Input
@@ -39,7 +31,6 @@ export function LoginForm() {
           name="username"
           placeholder="CaminoBBDD"
           required
-          disabled={isPending}
         />
       </div>
       <div className="space-y-2">
@@ -49,12 +40,9 @@ export function LoginForm() {
           name="password"
           type="password"
           required
-          disabled={isPending}
         />
       </div>
-      <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" aria-disabled={isPending}>
-        {isPending ? "Accediendo..." : "Acceder"}
-      </Button>
+      <LoginButton />
       {errorMessage && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
