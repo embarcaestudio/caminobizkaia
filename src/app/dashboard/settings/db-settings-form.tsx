@@ -1,15 +1,15 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { testDbConnection } from "@/lib/actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import React from "react";
+import React, { useActionState } from "react";
 
 export function DbSettingsForm() {
-  const [state, formAction] = useFormState(testDbConnection, null);
+  const [state, formAction] = useActionState(testDbConnection, null);
   const { toast } = useToast();
 
   React.useEffect(() => {

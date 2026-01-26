@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { authenticate } from "@/lib/actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 export function LoginForm() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [errorMessage, dispatch] = useActionState(authenticate, undefined);
 
   return (
     <form action={dispatch} className="space-y-4">
