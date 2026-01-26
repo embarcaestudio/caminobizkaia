@@ -1,7 +1,3 @@
-'use server';
-
-import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
 import {
   addHospitalero as dbAddHospitalero,
   updateHospitalero as dbUpdateHospitalero,
@@ -10,24 +6,22 @@ import {
 import { HospitaleroSchema } from './definitions';
 
 export async function authenticate(
-  prevState: string | undefined,
   formData: FormData
-) {
+): Promise<{ success: boolean; message?: string }> {
   const username = formData.get('username');
   const password = formData.get('password');
 
   // MOCK LOGIN
   if (username === 'CaminoBBDD' && password === 'Camino&%&%2023') {
     // In a real app you would set a session cookie here.
-    redirect('/dashboard');
+    return { success: true };
   }
-  return 'Usuario o contraseña incorrectos.';
+  return { success: false, message: 'Usuario o contraseña incorrectos.' };
 }
 
 export async function testDbConnection(
-  prevState: { message: string; success: boolean } | null,
   formData: FormData
-) {
+): Promise<{ message: string; success: boolean }> {
   const host = formData.get('host');
   // MOCK DB CONNECTION
   await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -77,8 +71,6 @@ export async function createHospitalero(formData: FormData) {
       message: 'Error de base de datos: no se pudo crear el hospitalero.',
     };
   }
-
-  revalidatePath('/dashboard');
 }
 
 export async function updateHospitalero(id: string, formData: FormData) {
@@ -110,15 +102,12 @@ export async function updateHospitalero(id: string, formData: FormData) {
       message: 'Error de base de datos: no se pudo actualizar el hospitalero.',
     };
   }
-
-  revalidatePath('/dashboard');
 }
 
 export async function deleteHospitalero(id: string) {
   try {
     const success = await dbDeleteHospitalero(id);
     if (success) {
-      revalidatePath('/dashboard');
       return { success: true, message: 'Hospitalero eliminado.' };
     }
     return {
