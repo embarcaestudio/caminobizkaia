@@ -17,7 +17,7 @@ export async function authenticate(
   const password = formData.get('password');
 
   // MOCK LOGIN
-  if (username === 'CaminoBBDD' && password === 'password') {
+  if (username === 'CaminoBBDD' && password === 'Camino&%&%2023') {
     // In a real app you would set a session cookie here.
     redirect('/dashboard');
   }
