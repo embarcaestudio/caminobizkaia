@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import {
   Table,
   TableBody,
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Hospitalero } from "@/lib/definitions";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { HospitalerosTableActions } from "./hospitaleros-table-actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -33,25 +31,20 @@ export function HospitalerosTable({ data }: { data: Hospitalero[] }) {
     if (isMobile) {
         return (
             <div className="space-y-4">
-                {data.map((hospitalero) => (
+                {data.map((hospitalero, index) => (
                     <Card key={hospitalero.id}>
                         <CardContent className="flex items-start gap-4 p-4">
-                             <div className="relative h-12 w-12 flex-shrink-0">
-                                <Image
-                                    src={PlaceHolderImages.find(p => p.id === hospitalero.avatar)?.imageUrl || `https://picsum.photos/seed/${hospitalero.id}/200/200`}
-                                    alt={`${hospitalero.nombre} ${hospitalero.apellido}`}
-                                    data-ai-hint="person smiling"
-                                    className="rounded-full object-cover"
-                                    fill
-                                />
+                             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-muted">
+                                <span className="text-lg font-semibold text-muted-foreground">{index + 1}</span>
                             </div>
-                            <div className="flex-grow space-y-1">
+                            <div className="flex-grow space-y-2">
                                 <div className="flex items-center justify-between">
                                     <p className="font-semibold">{hospitalero.nombre} {hospitalero.apellido}</p>
                                     <HospitalerosTableActions hospitalero={hospitalero} />
                                 </div>
                                 <p className="text-sm text-muted-foreground">{hospitalero.direccion}</p>
                                 <p className="text-sm text-muted-foreground">{hospitalero.telefono}</p>
+                                {hospitalero.notas && <p className="text-sm text-muted-foreground italic">"{hospitalero.notas}"</p>}
                                 <div>
                                     <Badge variant={availabilityMap[hospitalero.disponibilidad].variant}>
                                         {availabilityMap[hospitalero.disponibilidad].text}
@@ -70,38 +63,29 @@ export function HospitalerosTable({ data }: { data: Hospitalero[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">Avatar</TableHead>
+              <TableHead className="w-[50px]">#</TableHead>
               <TableHead>Nombre Completo</TableHead>
               <TableHead>Dirección</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Disponibilidad</TableHead>
+              <TableHead>Notas</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.length > 0 ? (
-              data.map((hospitalero) => {
-                const avatar = PlaceHolderImages.find(p => p.id === hospitalero.avatar);
+              data.map((hospitalero, index) => {
                 const availability = availabilityMap[hospitalero.disponibilidad];
                 return (
                   <TableRow key={hospitalero.id}>
-                    <TableCell>
-                      <div className="relative h-10 w-10">
-                        <Image
-                            src={avatar?.imageUrl || `https://picsum.photos/seed/${hospitalero.id}/200/200`}
-                            alt={`${hospitalero.nombre} ${hospitalero.apellido}`}
-                            data-ai-hint="person smiling"
-                            className="rounded-full object-cover"
-                            fill
-                        />
-                      </div>
-                    </TableCell>
+                    <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell className="font-medium">{hospitalero.nombre} {hospitalero.apellido}</TableCell>
                     <TableCell className="text-muted-foreground">{hospitalero.direccion}</TableCell>
                     <TableCell className="text-muted-foreground">{hospitalero.telefono}</TableCell>
                     <TableCell>
                       <Badge variant={availability.variant}>{availability.text}</Badge>
                     </TableCell>
+                    <TableCell className="text-muted-foreground">{hospitalero.notas}</TableCell>
                     <TableCell className="text-right">
                       <HospitalerosTableActions hospitalero={hospitalero} />
                     </TableCell>
@@ -110,7 +94,7 @@ export function HospitalerosTable({ data }: { data: Hospitalero[] }) {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24">
+                <TableCell colSpan={7} className="text-center h-24">
                   No hay hospitaleros registrados.
                 </TableCell>
               </TableRow>
