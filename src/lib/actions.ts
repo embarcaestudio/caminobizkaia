@@ -12,6 +12,7 @@ import {
 import { HospitaleroSchema, UserSchema } from './definitions';
 import mysql from 'mysql2/promise';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import type { z } from 'zod';
 
 
@@ -104,6 +105,7 @@ export async function createHospitalero(formData: FormData) {
     };
   }
 
+  revalidatePath('/dashboard');
   return { success: true };
 }
 
@@ -139,6 +141,7 @@ export async function updateHospitalero(id: string, formData: FormData) {
     };
   }
 
+  revalidatePath('/dashboard');
   return { success: true };
 }
 
@@ -146,6 +149,7 @@ export async function deleteHospitalero(id: string) {
   try {
     const success = await dbDeleteHospitalero(id);
     if (success) {
+      revalidatePath('/dashboard');
       return { success: true, message: 'Hospitalero eliminado.' };
     }
     return {
@@ -192,6 +196,7 @@ export async function createUser(formData: FormData) {
     };
   }
 
+  revalidatePath('/dashboard/users');
   return { success: true };
 }
 
@@ -227,6 +232,7 @@ export async function updateUser(id: string, formData: FormData) {
     };
   }
 
+  revalidatePath('/dashboard/users');
   return { success: true };
 }
 
@@ -234,6 +240,7 @@ export async function deleteUser(id: string) {
   try {
     const success = await dbDeleteUser(id);
     if (success) {
+      revalidatePath('/dashboard/users');
       return { success: true, message: 'Usuario eliminado.' };
     }
     return {
