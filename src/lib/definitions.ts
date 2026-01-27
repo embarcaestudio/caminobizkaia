@@ -23,3 +23,21 @@ export const HospitaleroSchema = z.object({
   notas: z.string().optional(),
   avatar: z.string().optional(),
 });
+
+
+export const UserSchema = z.object({
+  id: z.string().optional(),
+  username: z.string().min(3, { message: "El usuario debe tener al menos 3 caracteres." }),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres.").optional().or(z.literal('')),
+  can_add: z.boolean().default(false),
+  can_edit: z.boolean().default(false),
+  can_delete: z.boolean().default(false),
+});
+
+export type User = {
+  id: string;
+  username: string;
+  can_add: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+};

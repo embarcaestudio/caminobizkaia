@@ -1,6 +1,9 @@
-import type { Hospitalero } from './definitions';
+import type { Hospitalero, User } from './definitions';
+import { UserSchema } from './definitions';
 import mysql from 'mysql2/promise';
 import { randomUUID } from 'crypto';
+import type { z } from 'zod';
+
 
 // --- Database Connection ---
 // The database connection is now configured via environment variables.
@@ -52,6 +55,7 @@ async function query(sql: string, params: any[]): Promise<any> {
 
 
 export async function getHospitaleros(): Promise<Hospitalero[]> {
+    if (!dbConfig.host) return [];
     const results = await query('SELECT id, nombre, apellido, direccion, telefono, disponibilidad, notas, avatar FROM hospitaleros ORDER BY nombre, apellido', []) as any[];
     return results;
 }
@@ -100,5 +104,59 @@ export async function updateHospitalero(id: string, data: Partial<Omit<Hospitale
 
 export async function deleteHospitalero(id: string): Promise<boolean> {
   const result: any = await query('DELETE FROM hospitaleros WHERE id = ?', [id]);
+  return result.affectedRows > 0;
+}
+
+
+// --- User Functions ---
+
+export async function getUsers(): Promise<User[]> {
+    if (!dbConfig.host) return [];
+    const results = await query('SELECT id, username, can_add, can_edit, can_delete FROM users ORDER BY username', []) as any[];
+    return results.map(user => ({...user, can_add: !!user.can_add, can_edit: !!user.can_edit, can_delete: !!user.can_delete}));
+}
+
+export async function getUserById(id: string): Promise<User | undefined> {
+    const results = await query('SELECT id, username, can_add, can_edit, can_delete FROM users WHERE id = ?', [id]) as any[];
+    if (results.length === 0) return undefined;
+    const user = results[0];
+    return {...user, can_add: !!user.can_add, can_edit: !!user.can_edit, can_delete: !!user.can_delete};
+}
+
+export async function getUserByUsername(username: string) {
+    const results = await query('SELECT * FROM users WHERE username = ?', [username]) as any[];
+    if (results.length === 0) return undefined;
+    return results[0]; // returns full user object with password
+}
+
+export async function addUser(user: z.infer<typeof UserSchema>): Promise<User> {
+    const newId = randomUUID();
+    // For production, you should hash the password here.
+    await query(
+        'INSERT INTO users (id, username, password, can_add, can_edit, can_delete) VALUES (?, ?, ?, ?, ?, ?)',
+        [newId, user.username, user.password, user.can_add, user.can_edit, user.can_delete]
+    );
+    return { id: newId, username: user.username, can_add: !!user.can_add, can_edit: !!user.can_edit, can_delete: !!user.can_delete };
+}
+
+export async function updateUser(id: string, data: Partial<z.infer<typeof UserSchema>>): Promise<User | null> {
+    if (data.password) {
+        // For production, you should hash the password here.
+        await query(
+            'UPDATE users SET username = ?, password = ?, can_add = ?, can_edit = ?, can_delete = ? WHERE id = ?',
+            [data.username, data.password, data.can_add, data.can_edit, data.can_delete, id]
+        );
+    } else {
+        await query(
+            'UPDATE users SET username = ?, can_add = ?, can_edit = ?, can_delete = ? WHERE id = ?',
+            [data.username, data.can_add, data.can_edit, data.can_delete, id]
+        );
+    }
+    
+    return await getUserById(id) || null;
+}
+
+export async function deleteUser(id: string): Promise<boolean> {
+  const result: any = await query('DELETE FROM users WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }

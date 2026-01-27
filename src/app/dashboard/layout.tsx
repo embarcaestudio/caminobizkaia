@@ -12,7 +12,7 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { Home, Settings, UserCircle, LogOut } from "lucide-react";
+import { Home, Settings, UserCircle, LogOut, Users } from "lucide-react";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <Link href="/dashboard/settings">
                   <Settings />
                   Base de Datos
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/dashboard/users">
+                  <Users />
+                  Usuarios
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
