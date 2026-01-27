@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
@@ -28,14 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 export function UsersTableActions({ user }: { user: User }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { toast } = useToast();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
@@ -43,9 +37,7 @@ export function UsersTableActions({ user }: { user: User }) {
         title: "Actualizado",
         description: "Los datos del usuario han sido actualizados.",
     });
-    startTransition(() => {
-      router.refresh();
-    });
+    router.refresh();
   };
 
   const handleDeleteSuccess = () => {
@@ -54,21 +46,10 @@ export function UsersTableActions({ user }: { user: User }) {
         title: "Eliminado",
         description: "El usuario ha sido eliminado.",
     });
-    startTransition(() => {
-      router.refresh();
-    });
+    router.refresh();
   };
   
   const handleUpdateAction = updateUser.bind(null, user.id);
-
-  if (!isClient) {
-      return (
-          <Button variant="ghost" className="h-8 w-8 p-0" disabled>
-            <span className="sr-only">Abrir menú</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-      )
-  }
 
   // Admin user cannot be edited or deleted
   if (user.username === 'CaminoBBDD') {

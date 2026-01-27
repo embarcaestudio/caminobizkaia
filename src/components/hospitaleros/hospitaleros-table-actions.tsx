@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
@@ -28,15 +28,8 @@ import { useToast } from "@/hooks/use-toast";
 export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospitalero }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { toast } = useToast();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
@@ -44,9 +37,7 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
         title: "Actualizado",
         description: "Los datos del hospitalero han sido actualizados.",
     });
-    startTransition(() => {
-      router.refresh();
-    });
+    router.refresh();
   };
 
   const handleDeleteSuccess = () => {
@@ -55,21 +46,10 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
         title: "Eliminado",
         description: "El hospitalero ha sido eliminado.",
     });
-    startTransition(() => {
-      router.refresh();
-    });
+    router.refresh();
   };
   
   const handleUpdateAction = updateHospitalero.bind(null, hospitalero.id);
-
-  if (!isClient) {
-      return (
-          <Button variant="ghost" className="h-8 w-8 p-0" disabled>
-            <span className="sr-only">Abrir menú</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-      )
-  }
 
   return (
     <>
