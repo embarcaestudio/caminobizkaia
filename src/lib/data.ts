@@ -7,43 +7,40 @@ import { randomUUID } from 'crypto';
 // After you save your configuration, you should replace these
 // hardcoded values with a secure way to load your credentials,
 // for example, using environment variables.
+const dbConfig = {
+    host: 'YOUR_DATABASE_HOST', // e.g., 'sql123.cdmon.com'
+    user: 'YOUR_DATABASE_USER', // e.g., 'usuario_db'
+    password: 'YOUR_DATABASE_PASSWORD',
+    database: 'YOUR_DATABASE_NAME', // e.g., 'mi_base_de_datos'
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+};
+
 let pool: mysql.Pool;
 function getPool() {
     if (!pool) {
-        pool = mysql.createPool({
-            host: 'YOUR_DATABASE_HOST', // e.g., 'sql123.cdmon.com'
-            user: 'YOUR_DATABASE_USER', // e.g., 'usuario_db'
-            password: 'YOUR_DATABASE_PASSWORD',
-            database: 'YOUR_DATABASE_NAME', // e.g., 'mi_base_de_datos'
-            waitForConnections: true,
-            connectionLimit: 10,
-            queueLimit: 0
-        });
+        pool = mysql.createPool(dbConfig);
     }
     return pool;
 }
 
-async function query(sql: string, params: any[]) {
+async function query(sql: string, params: any[]): Promise<any> {
+    // If the host is the placeholder, don't try to connect.
+    if (dbConfig.host === 'YOUR_DATABASE_HOST') {
+        console.warn("Database is not configured. Returning empty results.");
+        return [];
+    }
+
     try {
         const pool = getPool();
         const [results] = await pool.execute(sql, params);
         return results;
     } catch (error) {
         console.error("Database query failed:", error);
-        // For the app to not crash, return empty array on connection failure.
-        // A real app should have a more robust error handling strategy.
-        if (error instanceof Error) {
-            const isConnectionError = 
-                error.message.includes('ENOTFOUND') || 
-                error.message.includes('ECONNREFUSED') ||
-                ('code' in error && typeof error.code === 'string' && ['ENOTFOUND', 'ECONNREFUSED'].includes(error.code));
-
-            if (isConnectionError) {
-                console.error("Could not connect to the database. This is expected if the database is not configured yet.");
-                return [];
-            }
-        }
-        throw new Error('Failed to execute database query.');
+        // For the app to not crash, return empty array on any query failure.
+        // This allows the app to continue running even if the DB connection is lost.
+        return [];
     }
 }
 
