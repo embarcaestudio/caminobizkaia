@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +18,13 @@ import { useToast } from "@/hooks/use-toast";
 
 export function AddHospitaleroButton() {
   const [open, setOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleSuccess = () => {
     setOpen(false);
@@ -30,6 +35,15 @@ export function AddHospitaleroButton() {
     });
     router.refresh();
   };
+
+  if (!isClient) {
+    return (
+      <Button className="bg-accent text-accent-foreground hover:bg-accent/90" disabled>
+        <PlusCircle />
+        Añadir Hospitalero
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
