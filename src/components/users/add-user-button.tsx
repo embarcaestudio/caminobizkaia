@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 export function AddUserButton() {
   const [open, setOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -33,7 +34,9 @@ export function AddUserButton() {
         description: "El usuario ha sido añadido correctamente.",
         variant: "default",
     });
-    router.refresh();
+    startTransition(() => {
+      router.refresh();
+    });
   };
 
   if (!isClient) {

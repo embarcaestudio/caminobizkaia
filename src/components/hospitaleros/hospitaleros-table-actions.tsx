@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
@@ -29,6 +29,7 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -43,15 +44,19 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
         title: "Actualizado",
         description: "Los datos del hospitalero han sido actualizados.",
     });
-    router.refresh();
+    startTransition(() => {
+      router.refresh();
+    });
   };
 
   const handleDeleteSuccess = () => {
     setIsDeleteDialogOpen(false);
-    router.refresh();
     toast({
         title: "Eliminado",
         description: "El hospitalero ha sido eliminado.",
+    });
+    startTransition(() => {
+      router.refresh();
     });
   };
   
