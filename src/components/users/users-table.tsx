@@ -40,13 +40,13 @@ export function UsersTable({ data }: { data: User[] }) {
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.username}</TableCell>
                     <TableCell>
-                        {user.can_add ? <CheckCircle className="text-green-500" /> : <XCircle className="text-red-500" />}
+                        {user.can_add ? <CheckCircle className="text-chart-2" /> : <XCircle className="text-destructive" />}
                     </TableCell>
                      <TableCell>
-                        {user.can_edit ? <CheckCircle className="text-green-500" /> : <XCircle className="text-red-500" />}
+                        {user.can_edit ? <CheckCircle className="text-chart-2" /> : <XCircle className="text-destructive" />}
                     </TableCell>
                      <TableCell>
-                        {user.can_delete ? <CheckCircle className="text-green-500" /> : <XCircle className="text-red-500" />}
+                        {user.can_delete ? <CheckCircle className="text-chart-2" /> : <XCircle className="text-destructive" />}
                     </TableCell>
                     <TableCell className="text-right">
                       <UsersTableActions user={user} />
