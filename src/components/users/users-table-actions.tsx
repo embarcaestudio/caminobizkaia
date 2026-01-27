@@ -79,7 +79,7 @@ export function UsersTableActions({ user }: { user: User }) {
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" modal={false}>
           <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Editar
