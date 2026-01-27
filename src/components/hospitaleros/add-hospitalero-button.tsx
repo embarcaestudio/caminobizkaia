@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +20,7 @@ export function AddHospitaleroButton() {
   const [open, setOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
@@ -30,7 +32,8 @@ export function AddHospitaleroButton() {
         title: "Éxito",
         description: "El hospitalero ha sido añadido correctamente.",
         variant: "default",
-    })
+    });
+    router.refresh();
   };
 
   if (!isClient) {

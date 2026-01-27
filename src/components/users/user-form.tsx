@@ -26,7 +26,7 @@ type UserFormValues = z.infer<typeof UserSchema>;
 interface UserFormProps {
   user?: User;
   onSuccess: () => void;
-  formAction: (data: FormData) => Promise<{ message: string; errors?: any } | void>;
+  formAction: (data: FormData) => Promise<{ success: boolean; message?: string; errors?: any }>;
 }
 
 export function UserForm({ user, onSuccess, formAction }: UserFormProps) {
@@ -55,14 +55,12 @@ export function UserForm({ user, onSuccess, formAction }: UserFormProps) {
 
     const result = await formAction(formData);
     
-    if (result?.message) {
+    if (result?.success) {
+       onSuccess();
+    } else if (result?.message) {
       if (!result.errors) {
         setServerError(result.message);
-      } else {
-        // Handle validation errors from the server if needed, though client-side should catch most
       }
-    } else if (result === undefined) { // Explicitly check for undefined for success
-       onSuccess();
     } else {
        setServerError("Ha ocurrido un error inesperado al guardar los datos.");
     }

@@ -31,10 +31,6 @@ export function DeleteHospitaleroDialog({
     const handleDelete = async () => {
         const result = await deleteHospitalero(hospitaleroId);
         if (result?.success) {
-            toast({
-                title: "Eliminado",
-                description: "El hospitalero ha sido eliminado.",
-            });
             onSuccess();
         } else {
              toast({

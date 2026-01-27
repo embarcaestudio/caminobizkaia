@@ -31,10 +31,6 @@ export function DeleteUserDialog({
     const handleDelete = async () => {
         const result = await deleteUser(userId);
         if (result?.success) {
-            toast({
-                title: "Eliminado",
-                description: "El usuario ha sido eliminado.",
-            });
             onSuccess();
         } else {
              toast({

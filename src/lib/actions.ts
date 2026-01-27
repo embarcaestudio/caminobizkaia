@@ -1,7 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import {
   addHospitalero as dbAddHospitalero,
   updateHospitalero as dbUpdateHospitalero,
@@ -13,6 +11,7 @@ import {
 } from './data';
 import { HospitaleroSchema, UserSchema } from './definitions';
 import mysql from 'mysql2/promise';
+import { redirect } from 'next/navigation';
 import type { z } from 'zod';
 
 
@@ -85,6 +84,7 @@ export async function createHospitalero(formData: FormData) {
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos. No se pudo crear el hospitalero.',
     };
@@ -99,11 +99,12 @@ export async function createHospitalero(formData: FormData) {
     });
   } catch (error: any) {
     return {
+      success: false,
       message: error.message || 'Error de base de datos: no se pudo crear el hospitalero.',
     };
   }
 
-  revalidatePath('/dashboard');
+  return { success: true };
 }
 
 export async function updateHospitalero(id: string, formData: FormData) {
@@ -118,6 +119,7 @@ export async function updateHospitalero(id: string, formData: FormData) {
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos. No se pudo actualizar el hospitalero.',
     };
@@ -132,18 +134,18 @@ export async function updateHospitalero(id: string, formData: FormData) {
     });
   } catch (error: any) {
     return {
+      success: false,
       message: error.message || 'Error de base de datos: no se pudo actualizar el hospitalero.',
     };
   }
 
-  revalidatePath('/dashboard');
+  return { success: true };
 }
 
 export async function deleteHospitalero(id: string) {
   try {
     const success = await dbDeleteHospitalero(id);
     if (success) {
-      revalidatePath('/dashboard');
       return { success: true, message: 'Hospitalero eliminado.' };
     }
     return {
@@ -171,24 +173,26 @@ export async function createUser(formData: FormData) {
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos. No se pudo crear el usuario.',
     };
   }
 
   if (!validatedFields.data.password) {
-      return { errors: { password: ['La contraseña es obligatoria.'] }, message: "La contraseña es obligatoria." }
+      return { success: false, errors: { password: ['La contraseña es obligatoria.'] }, message: "La contraseña es obligatoria." }
   }
 
   try {
     await dbAddUser(validatedFields.data);
   } catch (error: any) {
     return {
+      success: false,
       message: error.message || 'Error de base de datos: no se pudo crear el usuario.',
     };
   }
 
-  revalidatePath('/dashboard/users');
+  return { success: true };
 }
 
 export async function updateUser(id: string, formData: FormData) {
@@ -202,6 +206,7 @@ export async function updateUser(id: string, formData: FormData) {
 
   if (!validatedFields.success) {
     return {
+      success: false,
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Faltan campos. No se pudo actualizar el usuario.',
     };
@@ -217,18 +222,18 @@ export async function updateUser(id: string, formData: FormData) {
     await dbUpdateUser(id, updateData);
   } catch (error: any) {
     return {
+      success: false,
       message: error.message || 'Error de base de datos: no se pudo actualizar el usuario.',
     };
   }
 
-  revalidatePath('/dashboard/users');
+  return { success: true };
 }
 
 export async function deleteUser(id: string) {
   try {
     const success = await dbDeleteUser(id);
     if (success) {
-      revalidatePath('/dashboard/users');
       return { success: true, message: 'Usuario eliminado.' };
     }
     return {

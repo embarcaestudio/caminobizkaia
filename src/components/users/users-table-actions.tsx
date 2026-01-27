@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export function UsersTableActions({ user }: { user: User }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,11 +41,17 @@ export function UsersTableActions({ user }: { user: User }) {
     toast({
         title: "Actualizado",
         description: "Los datos del usuario han sido actualizados.",
-    })
+    });
+    router.refresh();
   };
 
   const handleDeleteSuccess = () => {
     setIsDeleteDialogOpen(false);
+    router.refresh();
+     toast({
+        title: "Eliminado",
+        description: "El usuario ha sido eliminado.",
+    });
   };
   
   const handleUpdateAction = updateUser.bind(null, user.id);

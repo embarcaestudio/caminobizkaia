@@ -32,7 +32,7 @@ type HospitaleroFormValues = z.infer<typeof HospitaleroSchema>;
 interface HospitaleroFormProps {
   hospitalero?: Hospitalero;
   onSuccess: () => void;
-  formAction: (data: FormData) => Promise<{ message: string; errors?: any } | void>;
+  formAction: (data: FormData) => Promise<{ success: boolean; message?: string; errors?: any }>;
 }
 
 export function HospitaleroForm({ hospitalero, onSuccess, formAction }: HospitaleroFormProps) {
@@ -62,17 +62,14 @@ export function HospitaleroForm({ hospitalero, onSuccess, formAction }: Hospital
 
     const result = await formAction(formData);
     
-    if (result?.message) {
+    if (result?.success) {
+      onSuccess();
+    } else if (result?.message) {
       // This is a server error if the `errors` object is not present
-      // Zod validation errors are handled automatically by the form resolver
       if (!result.errors) {
         setServerError(result.message);
       }
-    } else if (!result) {
-       // A void result means success in this case
-       onSuccess();
     } else {
-       // Fallback for unexpected cases
        setServerError("Ha ocurrido un error inesperado al guardar los datos.");
     }
   }
