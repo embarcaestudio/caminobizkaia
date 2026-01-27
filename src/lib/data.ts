@@ -3,15 +3,17 @@ import mysql from 'mysql2/promise';
 import { randomUUID } from 'crypto';
 
 // --- Database Connection ---
-// This is a placeholder for your database connection logic.
-// After you save your configuration, you should replace these
-// hardcoded values with a secure way to load your credentials,
-// for example, using environment variables.
+// The database connection is now configured via environment variables.
+// Create a .env.local file in the root of your project and add the following:
+// DB_HOST=...
+// DB_USER=...
+// DB_PASSWORD=...
+// DB_DATABASE=...
 const dbConfig = {
-    host: 'YOUR_DATABASE_HOST', // e.g., 'sql123.cdmon.com'
-    user: 'YOUR_DATABASE_USER', // e.g., 'usuario_db'
-    password: 'YOUR_DATABASE_PASSWORD',
-    database: 'YOUR_DATABASE_NAME', // e.g., 'mi_base_de_datos'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -20,20 +22,21 @@ const dbConfig = {
 let pool: mysql.Pool;
 function getPool() {
     if (!pool) {
+        // @ts-ignore
         pool = mysql.createPool(dbConfig);
     }
     return pool;
 }
 
 async function query(sql: string, params: any[]): Promise<any> {
-    // If the host is the placeholder, don't try to connect for reads.
-    if (dbConfig.host === 'YOUR_DATABASE_HOST') {
+    // If the host is not configured, don't try to connect.
+    if (!dbConfig.host) {
         if (sql.trim().toUpperCase().startsWith('SELECT')) {
             console.warn("Database is not configured. Returning empty results for read query.");
             return [];
         }
         // For writes, throw an error
-        throw new Error('La base de datos no está configurada. Por favor, introduce y guarda tus credenciales en la página de configuración.');
+        throw new Error('La base de datos no está configurada. Por favor, introduce tus credenciales en un fichero .env.local y reinicia el servidor.');
     }
 
     try {
@@ -43,7 +46,7 @@ async function query(sql: string, params: any[]): Promise<any> {
     } catch (error) {
         console.error("Database query failed:", error);
         // Re-throw the error so the action layer can catch it and report it to the user.
-        throw error;
+        throw new Error('No se pudo realizar la consulta a la base de datos. Comprueba que las credenciales en .env.local son correctas y que la base de datos es accesible.');
     }
 }
 

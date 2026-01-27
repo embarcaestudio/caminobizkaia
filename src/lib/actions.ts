@@ -8,6 +8,8 @@ import {
   deleteHospitalero as dbDeleteHospitalero,
 } from './data';
 import { HospitaleroSchema } from './definitions';
+import mysql from 'mysql2/promise';
+
 
 export async function authenticate(
   prevState: string | undefined,
@@ -27,42 +29,24 @@ export async function authenticate(
 export async function testDbConnection(
   formData: FormData
 ): Promise<{ message: string; success: boolean }> {
-  const host = formData.get('host');
-  // MOCK DB CONNECTION
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+    const host = formData.get('host') as string;
+    const database = formData.get('database') as string;
+    const user = formData.get('user') as string;
+    const password = formData.get('password') as string;
 
-  // You can test the failure case by using 'fail' as the host.
-  if (host === 'fail') {
-    return {
-      success: false,
-      message: 'No se pudo conectar a la base de datos.',
-    };
-  }
-
-  return {
-    success: true,
-    message: 'La conexión con la base de datos se ha establecido correctamente.',
-  };
-}
-
-export async function saveDbConnection(
-  formData: FormData
-): Promise<{ message: string; success: boolean }> {
-  const host = formData.get('host');
-  const database = formData.get('database');
-  const user = formData.get('user');
-  const password = formData.get('password');
-  
-  // In a real application, you would securely store these credentials,
-  // for example in a secret manager or encrypted in a configuration file.
-  // For this demo, we'll just simulate a successful save.
-  console.log('Saving DB connection details (simulation):', { host, database, user });
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  
-  return {
-    success: true,
-    message: 'La configuración de la base de datos se ha guardado correctamente.',
-  };
+    try {
+        const connection = await mysql.createConnection({ host, user, password, database });
+        await connection.end();
+        return {
+            success: true,
+            message: 'La conexión con la base de datos se ha establecido correctamente.',
+        };
+    } catch (error: any) {
+         return {
+            success: false,
+            message: `No se pudo conectar a la base de datos. Error: ${error.message}`,
+        };
+    }
 }
 
 
