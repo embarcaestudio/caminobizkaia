@@ -24,17 +24,20 @@ export async function authenticate(
     
     // If DB is configured, use it for authentication
     if (process.env.DB_HOST) {
+        let user;
         try {
-            const user = await getUserByUsername(username);
-
-            if (!user || user.password !== password) {
-                return 'Usuario o contraseña incorrectos.';
-            }
-            // In a real app you would set a session cookie here.
-            redirect('/dashboard');
+            user = await getUserByUsername(username);
         } catch (error: any) {
+            // This will catch DB connection errors from query()
             return error.message || 'Ha ocurrido un error al autenticar.'
         }
+
+        if (!user || user.password !== password) {
+            return 'Usuario o contraseña incorrectos.';
+        }
+        
+        // In a real app you would set a session cookie here.
+        redirect('/dashboard');
     }
 
     // Fallback to hardcoded admin if DB is not configured
@@ -172,12 +175,16 @@ export async function createUser(formData: FormData) {
     };
   }
   
+  const canAdd = formData.get('can_add') === 'true';
+  const canEdit = formData.get('can_edit') === 'true';
+  const canDelete = formData.get('can_delete') === 'true';
+
   if (!validatedFields.data.password) {
       return { errors: { password: ['La contraseña es obligatoria.'] }, message: "La contraseña es obligatoria." }
   }
 
   try {
-    await dbAddUser(validatedFields.data);
+    await dbAddUser({...validatedFields.data, can_add: canAdd, can_edit: canEdit, can_delete: canDelete});
   } catch (error: any) {
     return {
       message: error.message || 'Error de base de datos: no se pudo crear el usuario.',
@@ -191,9 +198,9 @@ export async function updateUser(id: string, formData: FormData) {
   const validatedFields = UserSchema.safeParse({
     username: formData.get('username'),
     password: formData.get('password'),
-    can_add: formData.get('can_add') === 'on',
-    can_edit: formData.get('can_edit') === 'on',
-    can_delete: formData.get('can_delete') === 'on',
+    can_add: formData.get('can_add') === 'true',
+    can_edit: formData.get('can_edit') === 'true',
+    can_delete: formData.get('can_delete') === 'true',
   });
 
   if (!validatedFields.success) {
@@ -205,6 +212,11 @@ export async function updateUser(id: string, formData: FormData) {
   
   const { password, ...dataToUpdate} = validatedFields.data;
   const updateData: any = dataToUpdate;
+  
+  updateData.can_add = formData.get('can_add') === 'true';
+  updateData.can_edit = formData.get('can_edit') === 'true';
+  updateData.can_delete = formData.get('can_delete') === 'true';
+
 
   if (password) {
       updateData.password = password;
