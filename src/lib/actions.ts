@@ -13,6 +13,7 @@ import {
 } from './data';
 import { HospitaleroSchema, UserSchema } from './definitions';
 import mysql from 'mysql2/promise';
+import type { z } from 'zod';
 
 
 export async function authenticate(
@@ -21,10 +22,10 @@ export async function authenticate(
 ): Promise<string> {
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
+    let user;
     
     // If DB is configured, use it for authentication
     if (process.env.DB_HOST) {
-        let user;
         try {
             user = await getUserByUsername(username);
         } catch (error: any) {
@@ -35,17 +36,17 @@ export async function authenticate(
         if (!user || user.password !== password) {
             return 'Usuario o contraseña incorrectos.';
         }
-        
-        // In a real app you would set a session cookie here.
-        redirect('/dashboard');
+    } else {
+        // Fallback to hardcoded admin if DB is not configured
+        if (username === 'CaminoBBDD' && password === 'Camino&%&%2023') {
+           // do nothing, let redirect happen
+        } else {
+            return 'Usuario o contraseña incorrectos.';
+        }
     }
-
-    // Fallback to hardcoded admin if DB is not configured
-    if (username === 'CaminoBBDD' && password === 'Camino&%&%2023') {
-        redirect('/dashboard');
-    }
-
-    return 'Usuario o contraseña incorrectos.';
+    
+    // In a real app you would set a session cookie here.
+    redirect('/dashboard');
 }
 
 export async function testDbConnection(
@@ -163,9 +164,9 @@ export async function createUser(formData: FormData) {
   const validatedFields = UserSchema.safeParse({
     username: formData.get('username'),
     password: formData.get('password'),
-    can_add: formData.get('can_add') === 'on',
-    can_edit: formData.get('can_edit') === 'on',
-    can_delete: formData.get('can_delete') === 'on',
+    can_add: formData.get('can_add') === 'true',
+    can_edit: formData.get('can_edit') === 'true',
+    can_delete: formData.get('can_delete') === 'true',
   });
 
   if (!validatedFields.success) {
@@ -174,17 +175,13 @@ export async function createUser(formData: FormData) {
       message: 'Faltan campos. No se pudo crear el usuario.',
     };
   }
-  
-  const canAdd = formData.get('can_add') === 'true';
-  const canEdit = formData.get('can_edit') === 'true';
-  const canDelete = formData.get('can_delete') === 'true';
 
   if (!validatedFields.data.password) {
       return { errors: { password: ['La contraseña es obligatoria.'] }, message: "La contraseña es obligatoria." }
   }
 
   try {
-    await dbAddUser({...validatedFields.data, can_add: canAdd, can_edit: canEdit, can_delete: canDelete});
+    await dbAddUser(validatedFields.data);
   } catch (error: any) {
     return {
       message: error.message || 'Error de base de datos: no se pudo crear el usuario.',
@@ -210,16 +207,10 @@ export async function updateUser(id: string, formData: FormData) {
     };
   }
   
-  const { password, ...dataToUpdate} = validatedFields.data;
-  const updateData: any = dataToUpdate;
+  const updateData: Partial<z.infer<typeof UserSchema>> = { ...validatedFields.data };
   
-  updateData.can_add = formData.get('can_add') === 'true';
-  updateData.can_edit = formData.get('can_edit') === 'true';
-  updateData.can_delete = formData.get('can_delete') === 'true';
-
-
-  if (password) {
-      updateData.password = password;
+  if (!updateData.password) {
+      delete updateData.password;
   }
 
   try {
