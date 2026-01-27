@@ -16,7 +16,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import type { Hospitalero } from "@/lib/definitions";
 import { HospitalerosTableActions } from "./hospitaleros-table-actions";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const availabilityMap: Record<Hospitalero['disponibilidad'], { text: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
     'todo-el-ano': { text: 'Todo el año', variant: 'default' },
@@ -26,79 +25,6 @@ const availabilityMap: Record<Hospitalero['disponibilidad'], { text: string; var
 };
 
 export function HospitalerosTable({ data }: { data: Hospitalero[] }) {
-    const isMobile = useIsMobile();
-    const [isClient, setIsClient] = React.useState(false);
-
-    React.useEffect(() => {
-        setIsClient(true);
-    }, []);
-
-    if (!isClient) {
-        return (
-            <Card>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">#</TableHead>
-                      <TableHead>Nombre Completo</TableHead>
-                      <TableHead>Dirección</TableHead>
-                      <TableHead>Teléfono</TableHead>
-                      <TableHead>Disponibilidad</TableHead>
-                      <TableHead>Notas</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        Cargando...
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-        );
-    }
-
-    if (isMobile) {
-        return (
-            <div className="space-y-4">
-                {data.length > 0 ? (
-                    data.map((hospitalero, index) => (
-                        <Card key={hospitalero.id}>
-                            <CardContent className="flex items-start gap-4 p-4">
-                                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-muted">
-                                    <span className="text-lg font-semibold text-muted-foreground">{index + 1}</span>
-                                </div>
-                                <div className="flex-grow space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-semibold">{hospitalero.nombre} {hospitalero.apellido}</p>
-                                        <HospitalerosTableActions hospitalero={hospitalero} />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">{hospitalero.direccion}</p>
-                                    <p className="text-sm text-muted-foreground">{hospitalero.telefono}</p>
-                                    {hospitalero.notas && <p className="text-sm text-muted-foreground italic">"{hospitalero.notas}"</p>}
-                                    <div>
-                                        <Badge variant={availabilityMap[hospitalero.disponibilidad].variant}>
-                                            {availabilityMap[hospitalero.disponibilidad].text}
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))
-                ) : (
-                    <Card>
-                        <CardContent className="p-4 text-center text-muted-foreground">
-                            No hay hospitaleros registrados.
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
-        );
-    }
   return (
     <Card>
       <CardContent>
