@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,11 @@ export function AddHospitaleroButton() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const handleSuccess = () => {
     setOpen(false);
     toast({
@@ -39,15 +44,17 @@ export function AddHospitaleroButton() {
           Añadir Hospitalero
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
-        <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">Añadir Nuevo Hospitalero</DialogTitle>
-          <DialogDescription>
-            Rellene el formulario para añadir un nuevo miembro a la lista.
-          </DialogDescription>
-        </DialogHeader>
-        <HospitaleroForm onSuccess={handleSuccess} formAction={createHospitalero} />
-      </DialogContent>
+      {isClient && (
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl">Añadir Nuevo Hospitalero</DialogTitle>
+            <DialogDescription>
+              Rellene el formulario para añadir un nuevo miembro a la lista.
+            </DialogDescription>
+          </DialogHeader>
+          <HospitaleroForm onSuccess={handleSuccess} formAction={createHospitalero} />
+        </DialogContent>
+      )}
     </Dialog>
   );
 }

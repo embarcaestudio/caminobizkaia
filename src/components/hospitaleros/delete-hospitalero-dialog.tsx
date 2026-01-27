@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteHospitalero } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 interface DeleteHospitaleroDialogProps {
   hospitaleroId: string;
@@ -27,6 +28,10 @@ export function DeleteHospitaleroDialog({
   onSuccess,
 }: DeleteHospitaleroDialogProps) {
     const { toast } = useToast();
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleDelete = async () => {
         const result = await deleteHospitalero(hospitaleroId);
@@ -43,20 +48,22 @@ export function DeleteHospitaleroDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta acción no se puede deshacer. Esto eliminará permanentemente al hospitalero de la base de datos.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-            Eliminar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+      {isClient && (
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente al hospitalero de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      )}
     </AlertDialog>
   );
 }

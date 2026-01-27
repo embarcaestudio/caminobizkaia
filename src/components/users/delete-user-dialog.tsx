@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteUser } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 interface DeleteUserDialogProps {
   userId: string;
@@ -27,6 +28,10 @@ export function DeleteUserDialog({
   onSuccess,
 }: DeleteUserDialogProps) {
     const { toast } = useToast();
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleDelete = async () => {
         const result = await deleteUser(userId);
@@ -43,20 +48,22 @@ export function DeleteUserDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario y sus permisos.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-            Eliminar
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+      {isClient && (
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario y sus permisos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      )}
     </AlertDialog>
   );
 }

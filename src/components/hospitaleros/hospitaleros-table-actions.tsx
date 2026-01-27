@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
@@ -30,6 +30,11 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
@@ -73,19 +78,21 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
       </DropdownMenu>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[625px]">
-          <DialogHeader>
-            <DialogTitle className="font-headline text-2xl">Editar Hospitalero</DialogTitle>
-            <DialogDescription>
-              Actualiza los datos de {hospitalero.nombre} {hospitalero.apellido}.
-            </DialogDescription>
-          </DialogHeader>
-          <HospitaleroForm
-            hospitalero={hospitalero}
-            onSuccess={handleEditSuccess}
-            formAction={handleUpdateAction}
-          />
-        </DialogContent>
+        {isClient && (
+          <DialogContent className="sm:max-w-[625px]">
+            <DialogHeader>
+              <DialogTitle className="font-headline text-2xl">Editar Hospitalero</DialogTitle>
+              <DialogDescription>
+                Actualiza los datos de {hospitalero.nombre} {hospitalero.apellido}.
+              </DialogDescription>
+            </DialogHeader>
+            <HospitaleroForm
+              hospitalero={hospitalero}
+              onSuccess={handleEditSuccess}
+              formAction={handleUpdateAction}
+            />
+          </DialogContent>
+        )}
       </Dialog>
       
       <DeleteHospitaleroDialog

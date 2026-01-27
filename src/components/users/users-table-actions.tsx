@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
@@ -30,6 +30,11 @@ export function UsersTableActions({ user }: { user: User }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
@@ -78,19 +83,21 @@ export function UsersTableActions({ user }: { user: User }) {
       </DropdownMenu>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle className="font-headline text-2xl">Editar Usuario</DialogTitle>
-            <DialogDescription>
-              Actualiza los datos de {user.username}.
-            </DialogDescription>
-          </DialogHeader>
-          <UserForm
-            user={user}
-            onSuccess={handleEditSuccess}
-            formAction={handleUpdateAction}
-          />
-        </DialogContent>
+        {isClient && (
+          <DialogContent className="sm:max-w-[480px]">
+            <DialogHeader>
+              <DialogTitle className="font-headline text-2xl">Editar Usuario</DialogTitle>
+              <DialogDescription>
+                Actualiza los datos de {user.username}.
+              </DialogDescription>
+            </DialogHeader>
+            <UserForm
+              user={user}
+              onSuccess={handleEditSuccess}
+              formAction={handleUpdateAction}
+            />
+          </DialogContent>
+        )}
       </Dialog>
       
       <DeleteUserDialog

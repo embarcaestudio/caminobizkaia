@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,11 @@ export function AddUserButton() {
   const { toast } = useToast();
   const router = useRouter();
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const handleSuccess = () => {
     setOpen(false);
     toast({
@@ -39,15 +44,17 @@ export function AddUserButton() {
           Añadir Usuario
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]">
-        <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">Añadir Nuevo Usuario</DialogTitle>
-          <DialogDescription>
-            Rellene el formulario para dar de alta un nuevo usuario.
-          </DialogDescription>
-        </DialogHeader>
-        <UserForm onSuccess={handleSuccess} formAction={createUser} />
-      </DialogContent>
+      {isClient && (
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl">Añadir Nuevo Usuario</DialogTitle>
+            <DialogDescription>
+              Rellene el formulario para dar de alta un nuevo usuario.
+            </DialogDescription>
+          </DialogHeader>
+          <UserForm onSuccess={handleSuccess} formAction={createUser} />
+        </DialogContent>
+      )}
     </Dialog>
   );
 }
