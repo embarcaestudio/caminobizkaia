@@ -1,6 +1,6 @@
 import type { Hospitalero, User } from './definitions';
 import { UserSchema } from './definitions';
-import mysql from 'mysql2/promise';
+import mysql, { type Pool } from 'mysql2/promise';
 import { randomUUID } from 'crypto';
 import type { z } from 'zod';
 
@@ -22,14 +22,24 @@ const dbConfig = {
     queueLimit: 0
 };
 
-let pool: mysql.Pool;
-function getPool() {
-    if (!pool) {
-        // @ts-ignore
-        pool = mysql.createPool(dbConfig);
-    }
-    return pool;
+// This global variable is used to cache the connection pool.
+// This is important to avoid exhausting database connections in a serverless environment or during development with hot-reloading.
+declare global {
+  // We use `var` here because `let` and `const` have block scope.
+  // eslint-disable-next-line no-var
+  var mysqlPool: Pool | undefined;
 }
+
+function getPool(): Pool {
+  if (global.mysqlPool) {
+      return global.mysqlPool;
+  }
+  // The type assertion is to handle the case where process.env variables might be undefined.
+  // The query function already checks if the host is configured.
+  global.mysqlPool = mysql.createPool(dbConfig as mysql.PoolOptions);
+  return global.mysqlPool;
+}
+
 
 async function query(sql: string, params: any[]): Promise<any> {
     // If the host is not configured, don't try to connect.
@@ -46,10 +56,10 @@ async function query(sql: string, params: any[]): Promise<any> {
         const pool = getPool();
         const [results] = await pool.execute(sql, params);
         return results;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Database query failed:", error);
         // Re-throw the error so the action layer can catch it and report it to the user.
-        throw new Error('No se pudo realizar la consulta a la base de datos. Comprueba que las credenciales en .env.local son correctas y que la base de datos es accesible.');
+        throw new Error(`No se pudo realizar la consulta a la base de datos. Comprueba que las credenciales en .env.local son correctas y que la base de datos es accesible. Error: ${error.message}`);
     }
 }
 
