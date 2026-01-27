@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { HospitaleroSchema, type Hospitalero } from "@/lib/definitions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 type HospitaleroFormValues = z.infer<typeof HospitaleroSchema>;
 
@@ -33,6 +36,8 @@ interface HospitaleroFormProps {
 }
 
 export function HospitaleroForm({ hospitalero, onSuccess, formAction }: HospitaleroFormProps) {
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const form = useForm<HospitaleroFormValues>({
     resolver: zodResolver(HospitaleroSchema),
     defaultValues: {
@@ -47,6 +52,7 @@ export function HospitaleroForm({ hospitalero, onSuccess, formAction }: Hospital
   });
 
   async function onSubmit(values: HospitaleroFormValues) {
+    setServerError(null);
     const formData = new FormData();
     Object.entries(values).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -56,10 +62,18 @@ export function HospitaleroForm({ hospitalero, onSuccess, formAction }: Hospital
 
     const result = await formAction(formData);
     
-    // In a real app, you would handle server-side validation errors here
-    // For this example, we assume success and close the dialog
-    if (!result || !result.errors) {
+    if (result?.message) {
+      // This is a server error if the `errors` object is not present
+      // Zod validation errors are handled automatically by the form resolver
+      if (!result.errors) {
+        setServerError(result.message);
+      }
+    } else if (!result) {
+       // A void result means success in this case
        onSuccess();
+    } else {
+       // Fallback for unexpected cases
+       setServerError("Ha ocurrido un error inesperado al guardar los datos.");
     }
   }
 
@@ -158,6 +172,13 @@ export function HospitaleroForm({ hospitalero, onSuccess, formAction }: Hospital
             </FormItem>
           )}
         />
+        {serverError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error al Guardar</AlertTitle>
+            <AlertDescription>{serverError}</AlertDescription>
+          </Alert>
+        )}
         <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? 'Guardando...' : (hospitalero ? 'Guardar Cambios' : 'Añadir Hospitalero')}
         </Button>

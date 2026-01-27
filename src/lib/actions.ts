@@ -92,9 +92,9 @@ export async function createHospitalero(formData: FormData) {
       ...dataToCreate,
       notas: dataToCreate.notas || '',
     });
-  } catch (error) {
+  } catch (error: any) {
     return {
-      message: 'Error de base de datos: no se pudo crear el hospitalero.',
+      message: error.message || 'Error de base de datos: no se pudo crear el hospitalero.',
     };
   }
 
@@ -125,9 +125,9 @@ export async function updateHospitalero(id: string, formData: FormData) {
       ...dataToUpdate,
       notas: dataToUpdate.notas || '',
     });
-  } catch (error) {
+  } catch (error: any) {
     return {
-      message: 'Error de base de datos: no se pudo actualizar el hospitalero.',
+      message: error.message || 'Error de base de datos: no se pudo actualizar el hospitalero.',
     };
   }
 

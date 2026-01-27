@@ -26,10 +26,14 @@ function getPool() {
 }
 
 async function query(sql: string, params: any[]): Promise<any> {
-    // If the host is the placeholder, don't try to connect.
+    // If the host is the placeholder, don't try to connect for reads.
     if (dbConfig.host === 'YOUR_DATABASE_HOST') {
-        console.warn("Database is not configured. Returning empty results.");
-        return [];
+        if (sql.trim().toUpperCase().startsWith('SELECT')) {
+            console.warn("Database is not configured. Returning empty results for read query.");
+            return [];
+        }
+        // For writes, throw an error
+        throw new Error('La base de datos no está configurada. Por favor, introduce y guarda tus credenciales en la página de configuración.');
     }
 
     try {
@@ -38,9 +42,8 @@ async function query(sql: string, params: any[]): Promise<any> {
         return results;
     } catch (error) {
         console.error("Database query failed:", error);
-        // For the app to not crash, return empty array on any query failure.
-        // This allows the app to continue running even if the DB connection is lost.
-        return [];
+        // Re-throw the error so the action layer can catch it and report it to the user.
+        throw error;
     }
 }
 
