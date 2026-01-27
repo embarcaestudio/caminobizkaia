@@ -29,12 +29,24 @@ export function AddHospitaleroButton() {
   const handleSuccess = () => {
     setOpen(false);
     toast({
-        title: "Éxito",
-        description: "El hospitalero ha sido añadido correctamente.",
-        variant: "default",
+      title: "Éxito",
+      description: "El hospitalero ha sido añadido correctamente.",
+      variant: "default",
     });
     router.refresh();
   };
+
+  if (!isClient) {
+    return (
+      <Button
+        className="bg-accent text-accent-foreground hover:bg-accent/90"
+        disabled
+      >
+        <PlusCircle />
+        Añadir Hospitalero
+      </Button>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -44,17 +56,20 @@ export function AddHospitaleroButton() {
           Añadir Hospitalero
         </Button>
       </DialogTrigger>
-      {isClient && (
-        <DialogContent className="sm:max-w-[625px]">
-          <DialogHeader>
-            <DialogTitle className="font-headline text-2xl">Añadir Nuevo Hospitalero</DialogTitle>
-            <DialogDescription>
-              Rellene el formulario para añadir un nuevo miembro a la lista.
-            </DialogDescription>
-          </DialogHeader>
-          <HospitaleroForm onSuccess={handleSuccess} formAction={createHospitalero} />
-        </DialogContent>
-      )}
+      <DialogContent className="sm:max-w-[625px]">
+        <DialogHeader>
+          <DialogTitle className="font-headline text-2xl">
+            Añadir Nuevo Hospitalero
+          </DialogTitle>
+          <DialogDescription>
+            Rellene el formulario para añadir un nuevo miembro a la lista.
+          </DialogDescription>
+        </DialogHeader>
+        <HospitaleroForm
+          onSuccess={handleSuccess}
+          formAction={createHospitalero}
+        />
+      </DialogContent>
     </Dialog>
   );
 }

@@ -27,43 +27,49 @@ export function DeleteUserDialog({
   onOpenChange,
   onSuccess,
 }: DeleteUserDialogProps) {
-    const { toast } = useToast();
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
+  const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
-    const handleDelete = async () => {
-        const result = await deleteUser(userId);
-        if (result?.success) {
-            onSuccess();
-        } else {
-             toast({
-                title: "Error",
-                description: result?.message || "No se pudo eliminar el usuario.",
-                variant: "destructive",
-            });
-        }
-    };
+  const handleDelete = async () => {
+    const result = await deleteUser(userId);
+    if (result?.success) {
+      onSuccess();
+    } else {
+      toast({
+        title: "Error",
+        description: result?.message || "No se pudo eliminar el usuario.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      {isClient && (
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario y sus permisos.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      )}
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta acción no se puede deshacer. Esto eliminará permanentemente al
+            usuario y sus permisos.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            className="bg-destructive hover:bg-destructive/90"
+          >
+            Eliminar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
     </AlertDialog>
   );
 }

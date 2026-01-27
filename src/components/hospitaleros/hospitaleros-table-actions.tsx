@@ -25,12 +25,16 @@ import type { Hospitalero } from "@/lib/definitions";
 import { updateHospitalero } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 
-export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospitalero }) {
+export function HospitalerosTableActions({
+  hospitalero,
+}: {
+  hospitalero: Hospitalero;
+}) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  
+
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
     setIsClient(true);
@@ -39,8 +43,8 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
   const handleEditSuccess = () => {
     setIsEditDialogOpen(false);
     toast({
-        title: "Actualizado",
-        description: "Los datos del hospitalero han sido actualizados.",
+      title: "Actualizado",
+      description: "Los datos del hospitalero han sido actualizados.",
     });
     router.refresh();
   };
@@ -48,14 +52,23 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
   const handleDeleteSuccess = () => {
     setIsDeleteDialogOpen(false);
     toast({
-        title: "Eliminado",
-        description: "El hospitalero ha sido eliminado.",
+      title: "Eliminado",
+      description: "El hospitalero ha sido eliminado.",
     });
     router.refresh();
   };
-  
+
   const handleUpdateAction = updateHospitalero.bind(null, hospitalero.id);
-  
+
+  if (!isClient) {
+    return (
+      <Button variant="ghost" className="h-8 w-8 p-0" disabled>
+        <span className="sr-only">Abrir menú</span>
+        <MoreHorizontal className="h-4 w-4" />
+      </Button>
+    );
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -70,7 +83,10 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
             <Pencil className="mr-2 h-4 w-4" />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setIsDeleteDialogOpen(true)} className="text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            onSelect={() => setIsDeleteDialogOpen(true)}
+            className="text-destructive focus:text-destructive"
+          >
             <Trash2 className="mr-2 h-4 w-4" />
             Eliminar
           </DropdownMenuItem>
@@ -78,23 +94,23 @@ export function HospitalerosTableActions({ hospitalero }: { hospitalero: Hospita
       </DropdownMenu>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        {isClient && (
-          <DialogContent className="sm:max-w-[625px]">
-            <DialogHeader>
-              <DialogTitle className="font-headline text-2xl">Editar Hospitalero</DialogTitle>
-              <DialogDescription>
-                Actualiza los datos de {hospitalero.nombre} {hospitalero.apellido}.
-              </DialogDescription>
-            </DialogHeader>
-            <HospitaleroForm
-              hospitalero={hospitalero}
-              onSuccess={handleEditSuccess}
-              formAction={handleUpdateAction}
-            />
-          </DialogContent>
-        )}
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl">
+              Editar Hospitalero
+            </DialogTitle>
+            <DialogDescription>
+              Actualiza los datos de {hospitalero.nombre} {hospitalero.apellido}.
+            </DialogDescription>
+          </DialogHeader>
+          <HospitaleroForm
+            hospitalero={hospitalero}
+            onSuccess={handleEditSuccess}
+            formAction={handleUpdateAction}
+          />
+        </DialogContent>
       </Dialog>
-      
+
       <DeleteHospitaleroDialog
         hospitaleroId={hospitalero.id}
         open={isDeleteDialogOpen}
