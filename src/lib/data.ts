@@ -32,9 +32,16 @@ async function query(sql: string, params: any[]) {
         console.error("Database query failed:", error);
         // For the app to not crash, return empty array on connection failure.
         // A real app should have a more robust error handling strategy.
-        if (error instanceof Error && 'code' in error && (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED')) {
-            console.error("Could not connect to the database. Please check your connection settings.");
-            return [];
+        if (error instanceof Error) {
+            const isConnectionError = 
+                error.message.includes('ENOTFOUND') || 
+                error.message.includes('ECONNREFUSED') ||
+                ('code' in error && typeof error.code === 'string' && ['ENOTFOUND', 'ECONNREFUSED'].includes(error.code));
+
+            if (isConnectionError) {
+                console.error("Could not connect to the database. This is expected if the database is not configured yet.");
+                return [];
+            }
         }
         throw new Error('Failed to execute database query.');
     }
