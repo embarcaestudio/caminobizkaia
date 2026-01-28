@@ -166,14 +166,18 @@ export async function deleteHospitalero(id: string) {
 
 // --- User Actions ---
 
+function validateUserData(formData: FormData) {
+    const rawData = Object.fromEntries(formData.entries());
+    return UserSchema.safeParse({
+        ...rawData,
+        can_add: rawData.can_add === 'true',
+        can_edit: rawData.can_edit === 'true',
+        can_delete: rawData.can_delete === 'true',
+    });
+}
+
 export async function createUser(formData: FormData) {
-  const validatedFields = UserSchema.safeParse({
-    username: formData.get('username'),
-    password: formData.get('password'),
-    can_add: formData.get('can_add') === 'true',
-    can_edit: formData.get('can_edit') === 'true',
-    can_delete: formData.get('can_delete') === 'true',
-  });
+  const validatedFields = validateUserData(formData);
 
   if (!validatedFields.success) {
     return {
@@ -182,13 +186,15 @@ export async function createUser(formData: FormData) {
       message: 'Faltan campos. No se pudo crear el usuario.',
     };
   }
+  
+  const { data } = validatedFields;
 
-  if (!validatedFields.data.password) {
+  if (!data.password) {
       return { success: false, errors: { password: ['La contraseña es obligatoria.'] }, message: "La contraseña es obligatoria." }
   }
 
   try {
-    await dbAddUser(validatedFields.data);
+    await dbAddUser(data);
   } catch (error: any) {
     return {
       success: false,
@@ -201,13 +207,7 @@ export async function createUser(formData: FormData) {
 }
 
 export async function updateUser(id: string, formData: FormData) {
-  const validatedFields = UserSchema.safeParse({
-    username: formData.get('username'),
-    password: formData.get('password'),
-    can_add: formData.get('can_add') === 'true',
-    can_edit: formData.get('can_edit') === 'true',
-    can_delete: formData.get('can_delete') === 'true',
-  });
+  const validatedFields = validateUserData(formData);
 
   if (!validatedFields.success) {
     return {
